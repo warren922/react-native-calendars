@@ -58,7 +58,7 @@ export default class AgendaView extends Component {
     // specify your item comparison function for increased performance
     rowHasChanged: PropTypes.func,
     // specify item sperator
-    ItemSeparatorComponent: PropTypes.node,
+    ItemSeparatorComponent: PropTypes.func,
 
     // Max amount of months allowed to scroll to the past. Default = 50
     pastScrollRange: PropTypes.number,

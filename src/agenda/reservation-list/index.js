@@ -28,7 +28,7 @@ class ReactComp extends Component {
     onDayChange: PropTypes.func,
     // onScroll ListView event
     onScroll: PropTypes.func,
-    ItemSeparatorComponent: PropTypes.node,
+    ItemSeparatorComponent: PropTypes.func,
     // the list of items that have to be displayed in agenda. If you want to render item as empty date
     // the value of date key kas to be an empty array []. If there exists no value for date key it is
     // considered that the date in question is not yet loaded
@@ -56,6 +56,10 @@ class ReactComp extends Component {
     this.updateDataSource(this.getReservations(this.props).reservations);
   }
 
+  onRef = list => {
+    this.list = list;
+  }
+
   updateDataSource(reservations) {
     this.setState({
       reservations
@@ -70,7 +74,11 @@ class ReactComp extends Component {
         scrollPosition += this.heights[i] || 0;
       }
       this.scrollOver = false;
-      this.list.scrollToOffset({ offset: scrollPosition, animated: true });
+      if (!this.props.renderSectionHeader) {
+        this.list.scrollToOffset({ offset: scrollPosition, animated: true });
+      // } else {
+      //   this.list.scrollToLocation({ animated: true, viewOffset: scrollPosition })
+      }
     }
     this.selectedDay = props.selectedDay;
     this.updateDataSource(reservations.reservations);
@@ -187,7 +195,7 @@ class ReactComp extends Component {
   renderFlatList = () => {
     return (
       <FlatList
-        ref={(c) => this.list = c}
+        ref={this.onRef}
         style={this.props.style}
         contentContainerStyle={this.styles.content}
         renderItem={this.renderRow.bind(this)}
@@ -212,14 +220,14 @@ class ReactComp extends Component {
     const { reservations } = this.state;
     const dateDicts = reservations.reduce((results, reservation) => {
       const date = reservation.day;
-      if (!results[date]) results[date] = {title: date, data: []};
+      if (!results[date]) results[date] = { title: date, data: [] };
       results[date].data.push(reservation);
       return results;
     }, {});
     const sections = Object.values(dateDicts);
     return (
       <SectionList
-        ref={(c) => this.list = c}
+        ref={this.onRef}
         style={this.props.style}
         contentContainerStyle={this.styles.content}
         renderItem={this.renderRow.bind(this)}
