@@ -1,6 +1,7 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
   FlatList,
+  SectionList,
   ActivityIndicator,
   View
 } from 'react-native';
@@ -17,6 +18,8 @@ class ReactComp extends Component {
     rowHasChanged: PropTypes.func,
     // specify how each item should be rendered in agenda
     renderItem: PropTypes.func,
+    // specify how each section header should be rendered in agenda if null, then use flatList
+    renderSectionHeader: PropTypes.func,
     // specify how each date should be rendered. day can be undefined if the item is not first in that day.
     renderDay: PropTypes.func,
     // specify how empty date content with no items should be rendered
@@ -43,7 +46,7 @@ class ReactComp extends Component {
     this.state = {
       reservations: []
     };
-    this.heights=[];
+    this.heights = [];
     this.selectedDay = this.props.selectedDay;
     this.scrollOver = true;
   }
@@ -66,7 +69,7 @@ class ReactComp extends Component {
         scrollPosition += this.heights[i] || 0;
       }
       this.scrollOver = false;
-      this.list.scrollToOffset({offset: scrollPosition, animated: true});
+      this.list.scrollToOffset({ offset: scrollPosition, animated: true });
     }
     this.selectedDay = props.selectedDay;
     this.updateDataSource(reservations.reservations);
@@ -109,7 +112,7 @@ class ReactComp extends Component {
     this.heights[ind] = event.nativeEvent.layout.height;
   }
 
-  renderRow({item, index}) {
+  renderRow({ item, index }) {
     return (
       <View onLayout={this.onRowLayoutChange.bind(this, index)}>
         <Reservation
@@ -151,7 +154,7 @@ class ReactComp extends Component {
 
   getReservations(props) {
     if (!props.reservations || !props.selectedDay) {
-      return {reservations: [], scrollPosition: 0};
+      return { reservations: [], scrollPosition: 0 };
     }
     let reservations = [];
     if (this.state.reservations && this.state.reservations.length) {
@@ -177,16 +180,10 @@ class ReactComp extends Component {
       iterator.addDays(1);
     }
 
-    return {reservations, scrollPosition};
+    return { reservations, scrollPosition };
   }
 
-  render() {
-    if (!this.props.reservations || !this.props.reservations[this.props.selectedDay.toString('yyyy-MM-dd')]) {
-      if (this.props.renderEmptyData) {
-        return this.props.renderEmptyData();
-      }
-      return (<ActivityIndicator style={{marginTop: 80}}/>);
-    }
+  renderFlatList = () => {
     return (
       <FlatList
         ref={(c) => this.list = c}
@@ -197,13 +194,62 @@ class ReactComp extends Component {
         onScroll={this.onScroll.bind(this)}
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={200}
-        onMoveShouldSetResponderCapture={() => {this.onListTouch(); return false;}}
+        onMoveShouldSetResponderCapture={() => {
+          this.onListTouch();
+          return false;
+        }}
         keyExtractor={(item, index) => String(index)}
         refreshControl={this.props.refreshControl}
         refreshing={this.props.refreshing || false}
         onRefresh={this.props.onRefresh}
       />
     );
+  }
+
+  renderSectionList = () => {
+    const { reservations } = this.state;
+    console.log(reservations);
+    const dateDicts = reservations.reduce((results, reservation) => {
+      const date = reservation.date;
+      if (!results[date]) results[date] = {title: date, data: []};
+      results[date].data.push(reservation);
+      return results;
+    }, {});
+    const sections = Object.values(dateDicts);
+    return (
+      <SectionList
+        ref={(c) => this.list = c}
+        style={this.props.style}
+        contentContainerStyle={this.styles.content}
+        renderItem={this.renderRow.bind(this)}
+        sections={sections}
+        onScroll={this.onScroll.bind(this)}
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={200}
+        onMoveShouldSetResponderCapture={() => {
+          this.onListTouch();
+          return false;
+        }}
+        keyExtractor={(item, index) => String(index)}
+        refreshControl={this.props.refreshControl}
+        refreshing={this.props.refreshing || false}
+        onRefresh={this.props.onRefresh}
+      />
+    )
+  }
+
+  render() {
+    if (!this.props.reservations || !this.props.reservations[this.props.selectedDay.toString('yyyy-MM-dd')]) {
+      if (this.props.renderEmptyData) {
+        return this.props.renderEmptyData();
+      }
+      return (<ActivityIndicator style={{ marginTop: 80 }} />);
+    }
+    if (!this.props.renderSectionHeader) {
+      this.renderFlatList();
+    } else {
+      this.renderSectionList();
+    }
   }
 }
 

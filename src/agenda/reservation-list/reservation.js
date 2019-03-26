@@ -61,7 +61,7 @@ class ReservationListItem extends Component {
     }
     return (
       <View style={this.styles.container}>
-        {this.renderDate(date, reservation)}
+        {/*{this.renderDate(date, reservation)}*/}
         <View style={{flex:1}}>
           {content}
         </View>
