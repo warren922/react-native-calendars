@@ -28,6 +28,7 @@ class ReactComp extends Component {
     onDayChange: PropTypes.func,
     // onScroll ListView event
     onScroll: PropTypes.func,
+    ItemSeparatorComponent: PropTypes.node,
     // the list of items that have to be displayed in agenda. If you want to render item as empty date
     // the value of date key kas to be an empty array []. If there exists no value for date key it is
     // considered that the date in question is not yet loaded
@@ -190,6 +191,7 @@ class ReactComp extends Component {
         style={this.props.style}
         contentContainerStyle={this.styles.content}
         renderItem={this.renderRow.bind(this)}
+        ItemSeparatorComponent={this.props.ItemSeparatorComponent}
         data={this.state.reservations}
         onScroll={this.onScroll.bind(this)}
         showsVerticalScrollIndicator={false}
@@ -208,9 +210,8 @@ class ReactComp extends Component {
 
   renderSectionList = () => {
     const { reservations } = this.state;
-    console.log(reservations);
     const dateDicts = reservations.reduce((results, reservation) => {
-      const date = reservation.date;
+      const date = reservation.day;
       if (!results[date]) results[date] = {title: date, data: []};
       results[date].data.push(reservation);
       return results;
@@ -222,6 +223,8 @@ class ReactComp extends Component {
         style={this.props.style}
         contentContainerStyle={this.styles.content}
         renderItem={this.renderRow.bind(this)}
+        renderSectionHeader={this.props.renderSectionHeader}
+        ItemSeparatorComponent={this.props.ItemSeparatorComponent}
         sections={sections}
         onScroll={this.onScroll.bind(this)}
         showsVerticalScrollIndicator={false}
@@ -235,7 +238,7 @@ class ReactComp extends Component {
         refreshing={this.props.refreshing || false}
         onRefresh={this.props.onRefresh}
       />
-    )
+    );
   }
 
   render() {
@@ -246,9 +249,9 @@ class ReactComp extends Component {
       return (<ActivityIndicator style={{ marginTop: 80 }} />);
     }
     if (!this.props.renderSectionHeader) {
-      this.renderFlatList();
+      return this.renderFlatList();
     } else {
-      this.renderSectionList();
+      return this.renderSectionList();
     }
   }
 }

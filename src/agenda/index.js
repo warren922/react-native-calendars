@@ -57,6 +57,8 @@ export default class AgendaView extends Component {
     renderEmptyData: PropTypes.func,
     // specify your item comparison function for increased performance
     rowHasChanged: PropTypes.func,
+    // specify item sperator
+    ItemSeparatorComponent: PropTypes.node,
 
     // Max amount of months allowed to scroll to the past. Default = 50
     pastScrollRange: PropTypes.number,
@@ -288,6 +290,7 @@ export default class AgendaView extends Component {
         reservations={this.props.items}
         selectedDay={this.state.selectedDay}
         renderEmptyData={this.props.renderEmptyData}
+        ItemSeparatorComponent={this.props.ItemSeparatorComponent}
         topDay={this.state.topDay}
         onDayChange={this.onDayChange.bind(this)}
         onScroll={() => {}}
