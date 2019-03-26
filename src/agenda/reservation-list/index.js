@@ -219,7 +219,7 @@ class ReactComp extends Component {
   renderSectionList = () => {
     const { reservations } = this.state;
     const dateDicts = reservations.reduce((results, reservation) => {
-      const date = reservation.day;
+      const date = reservation.day.toString('yyyy-MM-dd');
       if (!results[date]) results[date] = { title: date, data: [] };
       results[date].data.push(reservation);
       return results;
